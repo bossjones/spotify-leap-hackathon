@@ -185,7 +185,7 @@ def main():
 
     # Create a sample listener and controller
     listener = SampleListener()
-    listener.set_sound( s )
+    #listener.set_sound(s)
     controller = Leap.Controller()
 
     # Have the sample listener receive events from the controller
