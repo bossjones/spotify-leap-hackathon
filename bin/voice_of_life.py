@@ -28,11 +28,18 @@ sys.path.insert(0, lib_dir)
 import Leap, sys, thread, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
+# import PYO stuff
+from audioserver import AudioServer
+from sound import Sound
+import sys
 
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
     bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
     state_names = ['STATE_INVALID', 'STATE_START', 'STATE_UPDATE', 'STATE_END']
+
+    def set_sound(self, sound_obj):
+        self.sound = sound_obj
 
     def on_init(self, controller):
         print "Initialized"
@@ -53,6 +60,16 @@ class SampleListener(Leap.Listener):
     def on_exit(self, controller):
         print "Exited"
 
+    def compute_factor(self, a_float):
+       if a_float > 0:
+         # positive
+         # IF ITS POSITIVE: Factor = 1.25
+         return float((a_float/100.00) + 1.00)
+       else:
+         # negative
+         # IF ITS NEGATIVE: Factor = 0.25
+         return float((abs(a_float)/100.00))
+
     def on_frame(self, controller):
         # Get the most recent frame and report some basic information
         frame = controller.frame()
@@ -65,6 +82,8 @@ class SampleListener(Leap.Listener):
             # Get the hand's normal vector and direction
             normal = hand.palm_normal
             direction = hand.direction
+
+            s.transpose( self.compute_factor(normal.roll * Leap.RAD_TO_DEG) )
 
             # Calculate the hand's pitch, roll, and yaw angles
             print "  pitch: %f degrees, roll: %f degrees, yaw: %f degrees" % (
@@ -128,9 +147,28 @@ class SampleListener(Leap.Listener):
         if state == Leap.Gesture.STATE_INVALID:
             return "STATE_INVALID"
 
+# main thread
 def main():
+
+    ### PYO AUDIO SHIT
+
+    # creates audo daemon
+    server = AudioServer()
+
+    # gets instance of mic object for INPUT
+    m = server.getMic()
+
+    # pass INPUT object mic to Sound object
+    s = Sound(m)
+
+    # call play function to OUTPUT sound
+    s.play()
+
+    #### LEAP MOTION SHIT
+
     # Create a sample listener and controller
     listener = SampleListener()
+    listener.set_sound( s )
     controller = Leap.Controller()
 
     # Have the sample listener receive events from the controller
@@ -144,8 +182,8 @@ def main():
         pass
     finally:
         # Remove the sample listener when done
+        s.kill()
         controller.remove_listener(listener)
-
 
 if __name__ == "__main__":
     main()
