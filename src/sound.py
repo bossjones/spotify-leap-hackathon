@@ -26,11 +26,6 @@ class Sound(object):
 
   def kill(self):
     self.kill_flag = 1
-      # t.stop()
-
-  # while 1:
-  #   # print('test')
-
 
 
 

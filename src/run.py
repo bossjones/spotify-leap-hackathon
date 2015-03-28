@@ -1,31 +1,31 @@
-from audioserver import *
-from sound import *
-import sys
+# from audioserver import *
+# from sound import *
+# import sys
 
-# creates audo daemon
-server = AudioServer()
+# # creates audo daemon
+# server = AudioServer()
 
-# gets instance of mic object for INPUT
-m = server.getMic()
+# # gets instance of mic object for INPUT
+# m = server.getMic()
 
-# pass INPUT object mic to Sound object
-s = Sound(m)
+# # pass INPUT object mic to Sound object
+# s = Sound(m)
 
-# call play function to OUTPUT sound
-s.play()
+# # call play function to OUTPUT sound
+# s.play()
 
-while 1:
-  try:
-    n = random.uniform(.5, 3)
-    s.transpose(n)
-  except KeyboardInterrupt:
-    # threads = threading.enumerate()
-    # for t in threads:
-    #   t.stop()
-    s.kill()
-    exit()
+# while 1:
+#   try:
+#     n = random.uniform(.5, 3)
+#     s.transpose(n)
+#   except KeyboardInterrupt:
+#     # threads = threading.enumerate()
+#     # for t in threads:
+#     #   t.stop()
+#     s.kill()
+#     exit()
 
-# s.transpose(1.5)
+# # s.transpose(1.5)
 
 
-# repos; cd spotify-leap-hackathon/;
+# # repos; cd spotify-leap-hackathon/;

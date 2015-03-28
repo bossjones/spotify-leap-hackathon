@@ -21,16 +21,29 @@ from IPython.core import ultratb
 sys.excepthook = ultratb.FormattedTB(mode='Verbose',
      color_scheme='Linux', call_pdb=True, ostream=sys.__stdout__)
 
+# Get dir from which python script was called
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
+
+# Create full path to lib + proj dir
 lib_dir = os.path.abspath(os.path.join(src_dir, '../lib'))
+proj_dir = os.path.abspath(os.path.join(src_dir, '../src'))
+
+# Insert lib_dir and proj_dir before continuing forward
 sys.path.insert(0, lib_dir)
+sys.path.insert(0, proj_dir)
 
 import Leap, sys, thread, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
 # import PYO stuff
-from audioserver import AudioServer
-from sound import Sound
+#from audioserver import AudioServer
+#from sound import Sound
+
+from audioserver import *
+from sound import *
+
+#import AudioServer
+#import Sound
 import sys
 
 class SampleListener(Leap.Listener):
