@@ -14,3 +14,17 @@ zipline
 quandl
 scikit-learn
 pillow
+nltk
+q
+snakeviz
+html5lib 
+cssselect 
+pyquery 
+lxml 
+BeautifulSoup
+Flask 
+Django 
+tornado
+rdflib 
+SPARQLWrapper
+pyo
