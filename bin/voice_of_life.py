@@ -47,18 +47,43 @@ from sound import Sound
 import sys
 
 import time
+# will use this to trace when functions begin and end
+# see details from: http://stackoverflow.com/questions/308999/what-does-functools-wraps-do
+import textwrap
+from functools import wraps
+
+# trace decorator
+def trace(func):
+    """Tracing wrapper to log when function enter/exit happens.
+    :param func: Function to wrap
+    :type func: callable
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        print('Start {!r}'. format(func.__name__))
+        result = func(*args, **kwargs)
+        print('End {!r}'. format(func.__name__))
+        return result
+    return wrapper
 
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
     bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
     state_names = ['STATE_INVALID', 'STATE_START', 'STATE_UPDATE', 'STATE_END']
 
+    @trace
     def set_sound(self, sound_obj):
         self.sound = sound_obj
 
+    @trace
+    def get_roll(self):
+        return self.normal.roll * Leap.RAD_TO_DEG
+
+    @trace
     def on_init(self, controller):
         print "Initialized"
 
+    @trace
     def on_connect(self, controller):
         print "Connected"
 
@@ -68,13 +93,16 @@ class SampleListener(Leap.Listener):
         controller.enable_gesture(Leap.Gesture.TYPE_SCREEN_TAP);
         controller.enable_gesture(Leap.Gesture.TYPE_SWIPE);
 
+    @trace
     def on_disconnect(self, controller):
         # Note: not dispatched when running in a debugger.
         print "Disconnected"
 
+    @trace
     def on_exit(self, controller):
         print "Exited"
 
+    @trace
     def compute_factor(self, a_float):
        if a_float > 0:
          # positive
@@ -86,7 +114,7 @@ class SampleListener(Leap.Listener):
          # IF ITS NEGATIVE: Factor = 0.25
          return float((abs(a_float)/100.00))
          #return float(0.5)
-
+    @trace
     def on_frame(self, controller):
         # Get the most recent frame and report some basic information
         frame = controller.frame()
@@ -97,7 +125,7 @@ class SampleListener(Leap.Listener):
             handType = "Left hand" if hand.is_left else "Right hand"
 
             # Get the hand's normal vector and direction
-            normal = hand.palm_normal
+            self.normal = normal = hand.palm_normal
             direction = hand.direction
 
             # print self.compute_factor(normal.roll * Leap.RAD_TO_DEG)
@@ -151,7 +179,7 @@ class SampleListener(Leap.Listener):
 
         if not (frame.hands.is_empty and frame.gestures().is_empty):
             print ""
-
+    @trace
     def state_string(self, state):
         if state == Leap.Gesture.STATE_START:
             return "STATE_START"
@@ -181,8 +209,9 @@ def main():
     s = Sound(m)
 
     # call play function to OUTPUT sound
-    s.transpose(2.5)
     s.play()
+
+    #s.transpose(0.5)
 
     #### LEAP MOTION SHIT
 
@@ -216,6 +245,10 @@ def main():
         # Remove the sample listener when done
         s.kill()
         controller.remove_listener(listener)
+
+def pyo_callback(arg):
+    pass
+
 
 if __name__ == "__main__":
     main()
