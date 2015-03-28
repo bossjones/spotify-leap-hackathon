@@ -1,1 +1,16 @@
 wheel==0.23.0
+numpy
+scipy
+matplotlib
+ipython[all]
+pyzmq
+pygments
+patsy
+pandas
+sympy
+nose
+statsmodels
+zipline
+quandl
+scikit-learn
+pillow
