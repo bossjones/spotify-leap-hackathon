@@ -85,3 +85,9 @@ libogg.0.dylib
 
 Olivier Bélanger, 2015
 ````
+
+**Important for keyboard interaction etc and useful bootstrap steps**
+
+```
+# source: https://github.com/openstenoproject/plover/blob/master/osx/DevReadme.txt
+```

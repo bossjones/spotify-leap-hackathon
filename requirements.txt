@@ -27,4 +27,4 @@ Django
 tornado
 rdflib 
 SPARQLWrapper
-pyo
+simplejson
