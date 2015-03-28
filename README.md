@@ -34,8 +34,13 @@ cd ~/Sites/tmp
 svn checkout http://pyo.googlecode.com/svn/trunk/ pyo-read-only
  
 cd pyo-read-only
- 
-python setup.py install --use-coreaudio --use-jack --use-double
+
+# either jump into a virtualenv now or create one
+# CHOOSE:
+# workon spotify-leap-hackathon
+# mkvirtualenv spotify-leap-hackathon
+
+python setup.py install --use-coreaudio --use-double
  
 cd ../
  
