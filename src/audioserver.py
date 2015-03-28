@@ -1,6 +1,6 @@
 from pyo import *
 
-class AudioServer:
+class AudioServer(object):
 
   def __init__(self):
     self.connection = Server().boot()

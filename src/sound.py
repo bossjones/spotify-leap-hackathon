@@ -1,7 +1,7 @@
 from pyo import *
 import threading
 
-class Sound:
+class Sound(object):
   kill_flag = 0
   threads = []
 
@@ -26,11 +26,6 @@ class Sound:
 
   def kill(self):
     self.kill_flag = 1
-      # t.stop()
-
-  # while 1:
-  #   # print('test')
-
 
 
 

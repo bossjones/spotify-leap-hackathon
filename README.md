@@ -34,8 +34,13 @@ cd ~/Sites/tmp
 svn checkout http://pyo.googlecode.com/svn/trunk/ pyo-read-only
  
 cd pyo-read-only
- 
-python setup.py install --use-coreaudio --use-jack --use-double
+
+# either jump into a virtualenv now or create one
+# CHOOSE:
+# workon spotify-leap-hackathon
+# mkvirtualenv spotify-leap-hackathon
+
+python setup.py install --use-coreaudio --use-double
  
 cd ../
  
@@ -85,3 +90,9 @@ libogg.0.dylib
 
 Olivier Bélanger, 2015
 ````
+
+**Important for keyboard interaction etc and useful bootstrap steps**
+
+```
+# source: https://github.com/openstenoproject/plover/blob/master/osx/DevReadme.txt
+```
