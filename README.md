@@ -42,6 +42,13 @@ cd ../
 sudo rm -r pyo-read-only
 ```
 
+** Fix for LeapPython.so and using homebrew python **
+
+```
+install_name_tool -change /Library/Frameworks/Python.framework/Versions/2.7/Python \
+/usr/local/Cellar/python/2.7.9/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
+LeapPython.so
+```
 
 ```
 # Info on static libs installed
