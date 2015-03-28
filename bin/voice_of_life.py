@@ -46,6 +46,8 @@ from sound import Sound
 #import Sound
 import sys
 
+import time
+
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
     bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
@@ -170,6 +172,7 @@ def main():
 
     # creates audo daemon
     server = AudioServer()
+    time.sleep(1)
 
     # gets instance of mic object for INPUT
     m = server.getMic()
