@@ -36,11 +36,11 @@ import Leap, sys, thread, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
 # import PYO stuff
-#from audioserver import AudioServer
-#from sound import Sound
+from audioserver import AudioServer
+from sound import Sound
 
-from audioserver import *
-from sound import *
+#from audioserver import *
+#from sound import *
 
 #import AudioServer
 #import Sound
@@ -78,10 +78,12 @@ class SampleListener(Leap.Listener):
          # positive
          # IF ITS POSITIVE: Factor = 1.25
          return float((a_float/100.00) + 1.00)
+         #return float(0.5)
        else:
          # negative
          # IF ITS NEGATIVE: Factor = 0.25
          return float((abs(a_float)/100.00))
+         #return float(0.5)
 
     def on_frame(self, controller):
         # Get the most recent frame and report some basic information
@@ -96,7 +98,8 @@ class SampleListener(Leap.Listener):
             normal = hand.palm_normal
             direction = hand.direction
 
-            s.transpose( self.compute_factor(normal.roll * Leap.RAD_TO_DEG) )
+            # print self.compute_factor(normal.roll * Leap.RAD_TO_DEG)
+            #self.sound.transpose( self.compute_factor(normal.roll * Leap.RAD_TO_DEG) )
 
             # Calculate the hand's pitch, roll, and yaw angles
             print "  pitch: %f degrees, roll: %f degrees, yaw: %f degrees" % (
@@ -175,6 +178,7 @@ def main():
     s = Sound(m)
 
     # call play function to OUTPUT sound
+    s.transpose(2.5)
     s.play()
 
     #### LEAP MOTION SHIT
@@ -187,13 +191,25 @@ def main():
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
 
-    # Keep this process running until Enter is pressed
-    print "Press Enter to quit..."
-    try:
+    ### # Keep this process running until Enter is pressed
+    ### print "Press Enter to quit..."
+    ### try:
+    ###     sys.stdin.readline()
+    ### except KeyboardInterrupt:
+    ###     pass
+    ### finally:
+    ###     # Remove the sample listener when done
+    ###     s.kill()
+    ###     controller.remove_listener(listener)
+
+    while 1:
+      try:
+        #s.transpose(0.5)
         sys.stdin.readline()
-    except KeyboardInterrupt:
+      except KeyboardInterrupt:
         pass
-    finally:
+      finally:
+        print "cleaning up threads"
         # Remove the sample listener when done
         s.kill()
         controller.remove_listener(listener)
