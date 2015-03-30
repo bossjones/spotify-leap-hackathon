@@ -36,14 +36,10 @@ import Leap, sys, thread, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
 # import PYO stuff
+import pyo
 from audioserver import AudioServer
 from sound import Sound
 
-#from audioserver import *
-#from sound import *
-
-#import AudioServer
-#import Sound
 import sys
 
 import time
@@ -66,6 +62,9 @@ def trace(func):
         return result
     return wrapper
 
+def callback(arg):
+    s.freq = arg
+
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
     bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
@@ -77,7 +76,8 @@ class SampleListener(Leap.Listener):
 
     @trace
     def get_roll(self):
-        return self.normal.roll * Leap.RAD_TO_DEG
+        print "GET_ROLL: " + self.compute_factor(self.normal.roll * Leap.RAD_TO_DEG)
+        return self.compute_factor(self.normal.roll * Leap.RAD_TO_DEG)
 
     @trace
     def on_init(self, controller):
@@ -222,6 +222,8 @@ def main():
 
     # Have the sample listener receive events from the controller
     controller.add_listener(listener)
+
+    a = pyo.CallAfter(callback,1,listener.get_roll)
 
     ### # Keep this process running until Enter is pressed
     ### print "Press Enter to quit..."

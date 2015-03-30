@@ -3,7 +3,7 @@ from pyo import *
 class AudioServer(object):
 
   def __init__(self):
-    self.connection = Server().boot()
+    self.connection = Server(sr=44100, nchnls=2, duplex=0).boot()
     self.connection.start()
 
   def stop(self):
