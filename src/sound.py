@@ -32,14 +32,20 @@ class Sound(object):
 
     ## DISABLED # self.input = PVAnal(input, size=1024, overlaps=4, wintype=1)
     self._input = input
+
+    # WORKING
+    # self.m = Input(chnl=1, mul=2)
+    # pva = PVAnal(m, size=1024)
+    # pvt = PVTranspose(pva, transpo=1.5)
+    # pvs = PVSynth(pvt).out()
+    # dry = Delay(m, delay=1024./s.getSamplingRate(), mul=.7).out(1)
+
     self._freq  = freq
     self._mul   = mul
     self._add   = add
-    freq,mul,add,lmax = convertArgsToLists(freq,mul,add)
-    self._pva = PVAnal(input, size=size, overlaps=overlaps, wintype=wintype)
-    self._pvt = PVTranspose(self._pva, transpo=freq)
-    self._pvas = PVAddSynth(self._pvt, pitch=1, num=100, first=0, inc=1, mul=mul, add=add)
-    self._base_objs = self._pvas.getBaseObjects()
+    self._pva = PVAnal(input, size=int(size))
+    self._pvt = PVTranspose(self._pva, transpo=float(freq))
+    #self._base_objs = self._pvas.getBaseObjects()
 
   def __dir__(self):
       return ["freq"]
@@ -81,14 +87,9 @@ class Sound(object):
   @input.setter
   def input(self, x): self.setInput(x)
 
-
-  # @trace
-  # def get_input(self):
-  #   return self.input
-
-  # @trace
-  # def transpose(self):
-  #   PVTranspose( self.input, transpo=self.freq )
+  @trace
+  def transpose(self):
+    self._pvt = PVTranspose( self._pva, transpo=float(self._freq) )
 
   # @trace
   # def play(self):
@@ -97,26 +98,34 @@ class Sound(object):
   #   t.start()
   #   self.threads.append(t)
 
+  def getPVT(self):
+    return self._pvt
+
   @trace
   def play(self):
-    #PVTranspose(self._input, transpo=self.freq)
-    #p = PVAddSynth(self.input, pitch=1)
-    p = self._pvas
-    t = threading.Thread( target=self.playBack, args=(p,) )
-    t.start()
-    self.threads.append(t)
+      self._pvas  = PVAddSynth(self._pvt).out()
 
-  @trace
-  def playBack(self,p):
-    p.out()
-    while 1:
-      if self.kill_flag == 1:
-        print('kill')
-        exit()
 
-  @trace
-  def kill(self):
-    self.kill_flag = 1
+  # @trace
+  # def play(self):
+  #   #PVTranspose(self._input, transpo=self.freq)
+  #   #p = PVAddSynth(self.input, pitch=1)
+  #   p = self._pvas
+  #   t = threading.Thread( target=self.playBack, args=(p,) )
+  #   t.start()
+  #   self.threads.append(t)
+
+  # @trace
+  # def playBack(self,p):
+  #   p.out()
+  #   while 1:
+  #     if self.kill_flag == 1:
+  #       print('kill')
+  #       exit()
+
+  # @trace
+  # def kill(self):
+  #   self.kill_flag = 1
 
 
 

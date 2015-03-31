@@ -9,5 +9,8 @@ class AudioServer(object):
   def stop(self):
     self.connection.stop()
 
+  def getConnection(self):
+    return self.connection
+
   def getMic(self):
     return Input(chnl=1, mul=2)
