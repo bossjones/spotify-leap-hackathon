@@ -20,7 +20,7 @@ def trace(func):
     return wrapper
 
 
-class Sound(PyoObject):
+class Sound(object):
   kill_flag = 0
   threads = []
 
@@ -28,7 +28,7 @@ class Sound(PyoObject):
   def __init__(self, input, freq=1,size=1024,overlaps=4,wintype=1,mul=1, add=0):
     # Properly initialize PyoObject's basic attributes
     # PyoObject.__init__(self,size,overlaps,wintype)
-    PyoObject.__init__(self)
+    #PyoObject.__init__(self)
 
     ## DISABLED # self.input = PVAnal(input, size=1024, overlaps=4, wintype=1)
     self._input = input
@@ -36,14 +36,15 @@ class Sound(PyoObject):
     self._mul   = mul
     self._add   = add
     freq,mul,add,lmax = convertArgsToLists(freq,mul,add)
-    self._pva = PVAnal(self._input, size=size, overlaps=overlaps, wintype=wintype)
-    self._pvt = PVTranspose(self._input, transpo=freq)
-    self._pvas = PVAddSynth(self._input, pitch=self._pvt, num=100, first=0, inc=1, mul=mul, add=add)
+    self._pva = PVAnal(input, size=size, overlaps=overlaps, wintype=wintype)
+    self._pvt = PVTranspose(self._pva, transpo=freq)
+    self._pvas = PVAddSynth(self._pvt, pitch=1, num=100, first=0, inc=1, mul=mul, add=add)
     self._base_objs = self._pvas.getBaseObjects()
 
   def __dir__(self):
-      return ["input","freq"]
+      return ["freq"]
 
+  @trace
   def setFreq(self, x):
       """
       Replace the `freq` attribute.

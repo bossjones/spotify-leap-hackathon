@@ -41,18 +41,22 @@ server = AudioServer()
 # gets instance of mic object for INPUT
 m = Input(chnl=1, mul=2)
 
+print "%r" % m
+print m.__dir__()
+
 # pass INPUT object mic to Sound object
 s = Sound(m,freq=1,size=1024,overlaps=4,wintype=1,mul=1, add=0)
 
 # call play function to OUTPUT sound
 s.play()
 
-# while 1:
-#   try:
-#     s.transpose(n)
-#   except KeyboardInterrupt:
-#     s.kill()
-#     exit()
+while 1:
+  try:
+    n = random.uniform(.5, 5)
+    s.setFreq(n)
+  except KeyboardInterrupt:
+    s.kill()
+    exit()
 
 
 # s = Server(sr=44100, nchnls=2, duplex=0).boot()
