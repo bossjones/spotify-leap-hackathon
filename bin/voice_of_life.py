@@ -71,7 +71,7 @@ class SampleListener(Leap.Listener):
     state_names = ['STATE_INVALID', 'STATE_START', 'STATE_UPDATE', 'STATE_END']
 
     def __init__(self):
-        super(Listener, self).__init__()
+        super(SampleListener, self).__init__()
         # NOTE: How to trigger function on value change
         # source: http://stackoverflow.com/questions/6190468/how-to-trigger-function-on-value-change
         self._roll_degrees = 0.0
@@ -292,10 +292,10 @@ if __name__ == "__main__":
 
     while 1:
       try:
-        transpo = listener.get_roll()
-        #pvt = PVTranspose(pva, transpo=transpo)
-        pvt.setTranspo(transpo)
+        _transpo = listener.get_roll()
         time.sleep(1)
+        #pvt = PVTranspose(pva, transpo=transpo)
+        pvt.transpo = _transpo
         #s.transpose(0.5)
         sys.stdin.readline()
       except KeyboardInterrupt:
