@@ -70,6 +70,13 @@ class SampleListener(Leap.Listener):
     bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
     state_names = ['STATE_INVALID', 'STATE_START', 'STATE_UPDATE', 'STATE_END']
 
+    def __init__(self):
+        super(Listener, self).__init__()
+        # NOTE: How to trigger function on value change
+        # source: http://stackoverflow.com/questions/6190468/how-to-trigger-function-on-value-change
+        self._roll_degrees = 0.0
+        self._observers = []
+
     @trace
     def get_roll(self):
         #print "GET_ROLL: " + self.compute_factor(self.normal.roll * Leap.RAD_TO_DEG)
@@ -92,10 +99,6 @@ class SampleListener(Leap.Listener):
     @trace
     def on_init(self, controller):
         print "Initialized"
-        # NOTE: How to trigger function on value change
-        # source: http://stackoverflow.com/questions/6190468/how-to-trigger-function-on-value-change
-        self._roll_degrees = 0.0
-        self._observers = []
 
     @trace
     def on_connect(self, controller):
@@ -299,4 +302,5 @@ if __name__ == "__main__":
         pass
       finally:
         print "cleaning up threads"
+        controller.remove_listener(listener)
         sys.exit(0)
