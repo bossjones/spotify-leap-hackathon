@@ -36,9 +36,9 @@ import Leap, sys, thread, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
 # import PYO stuff
-import pyo
-from audioserver import AudioServer
-from sound import Sound
+from pyo import *
+#from audioserver import AudioServer
+#from sound import Sound
 
 import sys
 
@@ -71,17 +71,31 @@ class SampleListener(Leap.Listener):
     state_names = ['STATE_INVALID', 'STATE_START', 'STATE_UPDATE', 'STATE_END']
 
     @trace
-    def set_sound(self, sound_obj):
-        self.sound = sound_obj
-
-    @trace
     def get_roll(self):
-        print "GET_ROLL: " + self.compute_factor(self.normal.roll * Leap.RAD_TO_DEG)
-        return self.compute_factor(self.normal.roll * Leap.RAD_TO_DEG)
+        #print "GET_ROLL: " + self.compute_factor(self.normal.roll * Leap.RAD_TO_DEG)
+        #return self.compute_factor(self.normal.roll * Leap.RAD_TO_DEG)
+        print "GET_ROLL: " + self._roll_degrees
+        return self._roll_degrees
+
+    def set_roll(self, value):
+        self._roll_degrees = self.compute_factor(value * Leap.RAD_TO_DEG)
+        for callback in self._observers:
+            print 'announcing change'
+            callback(self._roll_degrees)
+
+    roll_degrees = property(get_roll, set_roll)
+
+    def bind_to(self, callback):
+        print 'bound'
+        self._observers.append(callback)
 
     @trace
     def on_init(self, controller):
         print "Initialized"
+        # NOTE: How to trigger function on value change
+        # source: http://stackoverflow.com/questions/6190468/how-to-trigger-function-on-value-change
+        self._roll_degrees = 0.0
+        self._observers = []
 
     @trace
     def on_connect(self, controller):
@@ -125,7 +139,7 @@ class SampleListener(Leap.Listener):
             handType = "Left hand" if hand.is_left else "Right hand"
 
             # Get the hand's normal vector and direction
-            self.normal = normal = hand.palm_normal
+            normal = hand.palm_normal
             direction = hand.direction
 
             # print self.compute_factor(normal.roll * Leap.RAD_TO_DEG)
@@ -136,6 +150,9 @@ class SampleListener(Leap.Listener):
                 direction.pitch * Leap.RAD_TO_DEG,
                 normal.roll * Leap.RAD_TO_DEG,
                 direction.yaw * Leap.RAD_TO_DEG)
+
+            # NOTE: Trigger callback
+            self.set_roll(normal.roll)
 
             # Get arm bone
             arm = hand.arm
@@ -193,64 +210,93 @@ class SampleListener(Leap.Listener):
         if state == Leap.Gesture.STATE_INVALID:
             return "STATE_INVALID"
 
-# main thread
-def main():
+# # main thread
+# def main():
 
-    ### PYO AUDIO SHIT
+#     ### PYO AUDIO SHIT
 
-    # creates audo daemon
-    server = AudioServer()
-    time.sleep(1)
+#     # creates audo daemon
+#     server = AudioServer()
+#     time.sleep(1)
 
-    # gets instance of mic object for INPUT
-    m = server.getMic()
+#     # gets instance of mic object for INPUT
+#     m = server.getMic()
 
-    # pass INPUT object mic to Sound object
-    s = Sound(m)
+#     # pass INPUT object mic to Sound object
+#     s = Sound(m)
 
-    # call play function to OUTPUT sound
-    s.play()
+#     # call play function to OUTPUT sound
+#     s.play()
 
-    #s.transpose(0.5)
+#     #s.transpose(0.5)
 
-    #### LEAP MOTION SHIT
+#     #### LEAP MOTION SHIT
 
-    # Create a sample listener and controller
-    listener = SampleListener()
-    #listener.set_sound(s)
-    controller = Leap.Controller()
+#     # Create a sample listener and controller
+#     listener = SampleListener()
+#     #listener.set_sound(s)
+#     controller = Leap.Controller()
 
-    # Have the sample listener receive events from the controller
-    controller.add_listener(listener)
+#     # Have the sample listener receive events from the controller
+#     controller.add_listener(listener)
 
-    a = pyo.CallAfter(callback,1,listener.get_roll)
+#     ### # Keep this process running until Enter is pressed
+#     ### print "Press Enter to quit..."
+#     ### try:
+#     ###     sys.stdin.readline()
+#     ### except KeyboardInterrupt:
+#     ###     pass
+#     ### finally:
+#     ###     # Remove the sample listener when done
+#     ###     s.kill()
+#     ###     controller.remove_listener(listener)
 
-    ### # Keep this process running until Enter is pressed
-    ### print "Press Enter to quit..."
-    ### try:
-    ###     sys.stdin.readline()
-    ### except KeyboardInterrupt:
-    ###     pass
-    ### finally:
-    ###     # Remove the sample listener when done
-    ###     s.kill()
-    ###     controller.remove_listener(listener)
-
-    while 1:
-      try:
-        #s.transpose(0.5)
-        sys.stdin.readline()
-      except KeyboardInterrupt:
-        pass
-      finally:
-        print "cleaning up threads"
-        # Remove the sample listener when done
-        s.kill()
-        controller.remove_listener(listener)
+#     while 1:
+#       try:
+#         #s.transpose(0.5)
+#         sys.stdin.readline()
+#       except KeyboardInterrupt:
+#         pass
+#       finally:
+#         print "cleaning up threads"
+#         # Remove the sample listener when done
+#         s.kill()
+#         controller.remove_listener(listener)
 
 def pyo_callback(arg):
     pass
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+
+    server = Server().boot()
+    server.start()
+
+
+    # gets instance of mic object for INPUT
+    m   = Input(chnl=1, mul=2)
+    pva = PVAnal(m, size=1024)
+    pvt = PVTranspose(pva, transpo=1.5)
+    pvs = PVSynth(pvt).out()
+    dry = Delay(m, delay=1024./server.getSamplingRate(), mul=.7).out(1)
+
+    time.sleep(1)
+
+    listener = SampleListener()
+    controller = Leap.Controller()
+    controller.add_listener(listener)
+
+    while 1:
+      try:
+        transpo = listener.get_roll()
+        #pvt = PVTranspose(pva, transpo=transpo)
+        pvt.setTranspo(transpo)
+        time.sleep(1)
+        #s.transpose(0.5)
+        sys.stdin.readline()
+      except KeyboardInterrupt:
+        pass
+      finally:
+        print "cleaning up threads"
+        sys.exit(0)

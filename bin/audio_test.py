@@ -57,17 +57,17 @@ from functools import wraps
 ##### DISABLED # pva = PVAnal(input, size=int(size))
 ##### DISABLED # pvt = PVTranspose(self._pva, transpo=float(freq))
 
-def main():
+# def main():
 
-  server = Server().boot()
-  server.start()
+#   server = Server().boot()
+#   server.start()
 
-  # gets instance of mic object for INPUT
-  m   = Input(chnl=1, mul=2)
-  pva = PVAnal(m, size=1024)
-  pvt = PVTranspose(pva, transpo=1.5)
-  pvs = PVSynth(pvt).out()
-  dry = Delay(m, delay=1024./server.getSamplingRate(), mul=.7).out(1)
+#   # gets instance of mic object for INPUT
+#   m   = Input(chnl=1, mul=2)
+#   pva = PVAnal(m, size=1024)
+#   pvt = PVTranspose(pva, transpo=1.5)
+#   pvs = PVSynth(pvt).out()
+#   dry = Delay(m, delay=1024./server.getSamplingRate(), mul=.7).out(1)
 
 
 # while 1:
@@ -79,16 +79,16 @@ def main():
 #     server.stop()
 #     s.kill()
 #     exit()
-  while 1:
-    try:
-      #s.transpose(0.5)
-      sys.stdin.readline()
-    except KeyboardInterrupt:
-      pass
-    finally:
-      print "cleaning up threads"
-      sys.exit(0)
-      # Remove the sample listener when done
+  # while 1:
+  #   try:
+  #     #s.transpose(0.5)
+  #     sys.stdin.readline()
+  #   except KeyboardInterrupt:
+  #     pass
+  #   finally:
+  #     print "cleaning up threads"
+  #     sys.exit(0)
+  #     # Remove the sample listener when done
 
 # s = Server(sr=44100, nchnls=2, duplex=0).boot()
 
@@ -101,4 +101,23 @@ def main():
 # s.gui(locals())
 
 if __name__ == "__main__":
-    main()
+    #main()
+    server = Server().boot()
+    server.start()
+
+    # gets instance of mic object for INPUT
+    m   = Input(chnl=1, mul=2)
+    pva = PVAnal(m, size=1024)
+    pvt = PVTranspose(pva, transpo=1.5)
+    pvs = PVSynth(pvt).out()
+    dry = Delay(m, delay=1024./server.getSamplingRate(), mul=.7).out(1)
+
+    while 1:
+      try:
+        #s.transpose(0.5)
+        sys.stdin.readline()
+      except KeyboardInterrupt:
+        pass
+      finally:
+        print "cleaning up threads"
+        sys.exit(0)
