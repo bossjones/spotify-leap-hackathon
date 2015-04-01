@@ -273,6 +273,9 @@ def pyo_callback(arg):
 if __name__ == "__main__":
     #main()
 
+    # NOTE: Good example
+    # Source: https://gist.github.com/jordanorelli/4569165
+
     server = Server().boot()
     server.start()
 
