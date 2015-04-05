@@ -1,18 +1,5 @@
 #!/usr/bin/env python
 
-# import os, sys, inspect
-
-# drops you down into pdb if exception is thrown
-import sys
-from IPython.core import ultratb
-sys.excepthook = ultratb.FormattedTB(mode='Verbose',
-     color_scheme='Linux', call_pdb=True, ostream=sys.__stdout__)
-
-# src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
-# lib_dir = os.path.abspath(os.path.join(src_dir, '../lib'))
-# sys.path.insert(0, lib_dir)
-# import Leap
-
 import os, sys, inspect
 
 # drops you down into pdb if exception is thrown
@@ -32,17 +19,14 @@ proj_dir = os.path.abspath(os.path.join(src_dir, '../src'))
 sys.path.insert(0, lib_dir)
 sys.path.insert(0, proj_dir)
 
-import Leap, sys, thread, time
+import Leap, sys, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
 # import PYO stuff
 from pyo import *
-#from audioserver import AudioServer
-#from sound import Sound
 
 import sys
 
-import time
 # will use this to trace when functions begin and end
 # see details from: http://stackoverflow.com/questions/308999/what-does-functools-wraps-do
 import textwrap
@@ -79,22 +63,13 @@ class SampleListener(Leap.Listener):
 
     @trace
     def get_roll(self):
-        #print "GET_ROLL: " + self.compute_factor(self.normal.roll * Leap.RAD_TO_DEG)
-        #return self.compute_factor(self.normal.roll * Leap.RAD_TO_DEG)
-        print "GET_ROLL: " + self._roll_degrees
+        print "GET_ROLL: %f" % self._roll_degrees
         return self._roll_degrees
 
+    @trace
     def set_roll(self, value):
         self._roll_degrees = self.compute_factor(value * Leap.RAD_TO_DEG)
-        for callback in self._observers:
-            print 'announcing change'
-            callback(self._roll_degrees)
-
-    roll_degrees = property(get_roll, set_roll)
-
-    def bind_to(self, callback):
-        print 'bound'
-        self._observers.append(callback)
+        print "set_roll: %f" % (self._roll_degrees)
 
     @trace
     def on_init(self, controller):
@@ -124,13 +99,11 @@ class SampleListener(Leap.Listener):
        if a_float > 0:
          # positive
          # IF ITS POSITIVE: Factor = 1.25
-         return float((a_float/100.00) + 1.00)
-         #return float(0.5)
+         return float((a_float/100.00) + 10.00)
        else:
          # negative
          # IF ITS NEGATIVE: Factor = 0.25
          return float((abs(a_float)/100.00))
-         #return float(0.5)
     @trace
     def on_frame(self, controller):
         # Get the most recent frame and report some basic information
@@ -144,9 +117,6 @@ class SampleListener(Leap.Listener):
             # Get the hand's normal vector and direction
             normal = hand.palm_normal
             direction = hand.direction
-
-            # print self.compute_factor(normal.roll * Leap.RAD_TO_DEG)
-            #self.sound.transpose( self.compute_factor(normal.roll * Leap.RAD_TO_DEG) )
 
             # Calculate the hand's pitch, roll, and yaw angles
             print "  pitch: %f degrees, roll: %f degrees, yaw: %f degrees" % (
@@ -213,65 +183,7 @@ class SampleListener(Leap.Listener):
         if state == Leap.Gesture.STATE_INVALID:
             return "STATE_INVALID"
 
-# # main thread
-# def main():
-
-#     ### PYO AUDIO SHIT
-
-#     # creates audo daemon
-#     server = AudioServer()
-#     time.sleep(1)
-
-#     # gets instance of mic object for INPUT
-#     m = server.getMic()
-
-#     # pass INPUT object mic to Sound object
-#     s = Sound(m)
-
-#     # call play function to OUTPUT sound
-#     s.play()
-
-#     #s.transpose(0.5)
-
-#     #### LEAP MOTION SHIT
-
-#     # Create a sample listener and controller
-#     listener = SampleListener()
-#     #listener.set_sound(s)
-#     controller = Leap.Controller()
-
-#     # Have the sample listener receive events from the controller
-#     controller.add_listener(listener)
-
-#     ### # Keep this process running until Enter is pressed
-#     ### print "Press Enter to quit..."
-#     ### try:
-#     ###     sys.stdin.readline()
-#     ### except KeyboardInterrupt:
-#     ###     pass
-#     ### finally:
-#     ###     # Remove the sample listener when done
-#     ###     s.kill()
-#     ###     controller.remove_listener(listener)
-
-#     while 1:
-#       try:
-#         #s.transpose(0.5)
-#         sys.stdin.readline()
-#       except KeyboardInterrupt:
-#         pass
-#       finally:
-#         print "cleaning up threads"
-#         # Remove the sample listener when done
-#         s.kill()
-#         controller.remove_listener(listener)
-
-def pyo_callback(arg):
-    pass
-
-
 if __name__ == "__main__":
-    #main()
 
     # NOTE: Good example
     # Source: https://gist.github.com/jordanorelli/4569165
@@ -292,18 +204,10 @@ if __name__ == "__main__":
     listener = SampleListener()
     controller = Leap.Controller()
     controller.add_listener(listener)
+    server.gui(locals())
 
-    while 1:
-      try:
-        _transpo = listener.get_roll()
-        time.sleep(1)
-        #pvt = PVTranspose(pva, transpo=transpo)
-        pvt.transpo = _transpo
-        #s.transpose(0.5)
-        sys.stdin.readline()
-      except KeyboardInterrupt:
-        pass
-      finally:
-        print "cleaning up threads"
-        controller.remove_listener(listener)
-        sys.exit(0)
+    _transpo = listener.get_roll()
+    pvt.setTranspo(_transpo)
+
+    sys.stdin.readline()
+    controller.remove_listener(listener)
