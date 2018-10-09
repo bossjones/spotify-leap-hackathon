@@ -1,18 +1,5 @@
 #!/usr/bin/env python
 
-# import os, sys, inspect
-
-# # drops you down into pdb if exception is thrown
-# import sys
-# from IPython.core import ultratb
-# sys.excepthook = ultratb.FormattedTB(mode='Verbose',
-#      color_scheme='Linux', call_pdb=True, ostream=sys.__stdout__)
-
-# src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
-# lib_dir = os.path.abspath(os.path.join(src_dir, '../lib'))
-# sys.path.insert(0, lib_dir)
-# import Leap
-
 import os, sys, inspect
 
 # drops you down into pdb if exception is thrown
@@ -32,21 +19,14 @@ proj_dir = os.path.abspath(os.path.join(src_dir, '../src'))
 sys.path.insert(0, lib_dir)
 sys.path.insert(0, proj_dir)
 
-import Leap, sys, thread, time
+import Leap, sys, time
 from Leap import CircleGesture, KeyTapGesture, ScreenTapGesture, SwipeGesture
 
 # import PYO stuff
-from audioserver import AudioServer
-from sound import Sound
+from pyo import *
 
-#from audioserver import *
-#from sound import *
-
-#import AudioServer
-#import Sound
 import sys
 
-import time
 # will use this to trace when functions begin and end
 # see details from: http://stackoverflow.com/questions/308999/what-does-functools-wraps-do
 import textwrap
@@ -66,18 +46,30 @@ def trace(func):
         return result
     return wrapper
 
+def callback(arg):
+    s.freq = arg
+
 class SampleListener(Leap.Listener):
     finger_names = ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']
     bone_names = ['Metacarpal', 'Proximal', 'Intermediate', 'Distal']
     state_names = ['STATE_INVALID', 'STATE_START', 'STATE_UPDATE', 'STATE_END']
 
-    @trace
-    def set_sound(self, sound_obj):
-        self.sound = sound_obj
+    def __init__(self):
+        super(SampleListener, self).__init__()
+        # NOTE: How to trigger function on value change
+        # source: http://stackoverflow.com/questions/6190468/how-to-trigger-function-on-value-change
+        self._roll_degrees = 0.0
+        self._observers = []
 
     @trace
     def get_roll(self):
-        return self.normal.roll * Leap.RAD_TO_DEG
+        print "GET_ROLL: %f" % self._roll_degrees
+        return self._roll_degrees
+
+    @trace
+    def set_roll(self, value):
+        self._roll_degrees = self.compute_factor(value * Leap.RAD_TO_DEG)
+        print "set_roll: %f" % (self._roll_degrees)
 
     @trace
     def on_init(self, controller):
@@ -107,13 +99,11 @@ class SampleListener(Leap.Listener):
        if a_float > 0:
          # positive
          # IF ITS POSITIVE: Factor = 1.25
-         return float((a_float/100.00) + 1.00)
-         #return float(0.5)
+         return float((a_float/100.00) + 10.00)
        else:
          # negative
          # IF ITS NEGATIVE: Factor = 0.25
          return float((abs(a_float)/100.00))
-         #return float(0.5)
     @trace
     def on_frame(self, controller):
         # Get the most recent frame and report some basic information
@@ -125,17 +115,17 @@ class SampleListener(Leap.Listener):
             handType = "Left hand" if hand.is_left else "Right hand"
 
             # Get the hand's normal vector and direction
-            self.normal = normal = hand.palm_normal
+            normal = hand.palm_normal
             direction = hand.direction
-
-            # print self.compute_factor(normal.roll * Leap.RAD_TO_DEG)
-            #self.sound.transpose( self.compute_factor(normal.roll * Leap.RAD_TO_DEG) )
 
             # Calculate the hand's pitch, roll, and yaw angles
             print "  pitch: %f degrees, roll: %f degrees, yaw: %f degrees" % (
                 direction.pitch * Leap.RAD_TO_DEG,
                 normal.roll * Leap.RAD_TO_DEG,
                 direction.yaw * Leap.RAD_TO_DEG)
+
+            # NOTE: Trigger callback
+            self.set_roll(normal.roll)
 
             # Get arm bone
             arm = hand.arm
@@ -193,62 +183,31 @@ class SampleListener(Leap.Listener):
         if state == Leap.Gesture.STATE_INVALID:
             return "STATE_INVALID"
 
-# main thread
-def main():
+if __name__ == "__main__":
 
-    ### PYO AUDIO SHIT
+    # NOTE: Good example
+    # Source: https://gist.github.com/jordanorelli/4569165
 
-    # creates audo daemon
-    server = AudioServer()
-    time.sleep(1)
+    server = Server().boot()
+    server.start()
+
 
     # gets instance of mic object for INPUT
-    m = server.getMic()
+    m   = Input(chnl=1, mul=2)
+    pva = PVAnal(m, size=1024)
+    pvt = PVTranspose(pva, transpo=1.5)
+    pvs = PVSynth(pvt).out()
+    dry = Delay(m, delay=1024./server.getSamplingRate(), mul=.7).out(1)
 
-    # pass INPUT object mic to Sound object
-    s = Sound(m)
+    time.sleep(1)
 
-    # call play function to OUTPUT sound
-    s.play()
-
-    #s.transpose(0.5)
-
-    #### LEAP MOTION SHIT
-
-    # Create a sample listener and controller
     listener = SampleListener()
-    #listener.set_sound(s)
     controller = Leap.Controller()
-
-    # Have the sample listener receive events from the controller
     controller.add_listener(listener)
+    server.gui(locals())
 
-    ### # Keep this process running until Enter is pressed
-    ### print "Press Enter to quit..."
-    ### try:
-    ###     sys.stdin.readline()
-    ### except KeyboardInterrupt:
-    ###     pass
-    ### finally:
-    ###     # Remove the sample listener when done
-    ###     s.kill()
-    ###     controller.remove_listener(listener)
+    _transpo = listener.get_roll()
+    pvt.setTranspo(_transpo)
 
-    while 1:
-      try:
-        #s.transpose(0.5)
-        sys.stdin.readline()
-      except KeyboardInterrupt:
-        pass
-      finally:
-        print "cleaning up threads"
-        # Remove the sample listener when done
-        s.kill()
-        controller.remove_listener(listener)
-
-def pyo_callback(arg):
-    pass
-
-
-if __name__ == "__main__":
-    main()
+    sys.stdin.readline()
+    controller.remove_listener(listener)

@@ -96,3 +96,18 @@ Olivier Bélanger, 2015
 ```
 # source: https://github.com/openstenoproject/plover/blob/master/osx/DevReadme.txt
 ```
+
+```
+Test that pyo is installed correctly etc
+
+from pyo import *
+
+s = Server().boot()
+s.start()
+m = Input(chnl=1, mul=2)
+pva = PVAnal(m, size=1024)
+pvt = PVTranspose(pva, transpo=1.5)
+pvs = PVSynth(pvt).out()
+dry = Delay(m, delay=1024./s.getSamplingRate(), mul=.7).out(1)
+
+```
